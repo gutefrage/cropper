@@ -5,7 +5,7 @@
  * Copyright (c) 2014-2015 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2015-07-05T10:44:58.203Z
+ * Date: 2015-07-27T13:39:49.726Z
  */
 
 (function (factory) {
@@ -1023,8 +1023,8 @@
 
         this.dragType = dragType;
         this.cropping = false;
-        this.startX = e.pageX;
-        this.startY = e.pageY;
+        this.startX = e.originalEvent ? e.originalEvent.pageX : e.pageX;
+        this.startY = e.originalEvent ? e.originalEvent.pageY : e.pageY;
 
         if (dragType === 'crop') {
           this.cropping = true;
@@ -1076,8 +1076,8 @@
           return;
         }
 
-        this.endX = e.pageX;
-        this.endY = e.pageY;
+        this.endX = e.originalEvent ? e.originalEvent.pageX : e.pageX;
+        this.endY = e.originalEvent ? e.originalEvent.pageY : e.pageY;
 
         this.change(e.shiftKey);
       }
@@ -1403,7 +1403,9 @@
 
     setCropBoxData: function (data) {
       var cropBox = this.cropBox,
-          aspectRatio = this.options.aspectRatio;
+          aspectRatio = this.options.aspectRatio,
+          widthChanged,
+          heightChanged;
 
       if (this.built && this.cropped && !this.disabled && $.isPlainObject(data)) {
 
@@ -1415,18 +1417,20 @@
           cropBox.top = data.top;
         }
 
-        if (isNumber(data.width)) {
+        if (isNumber(data.width) && data.width !== cropBox.width) {
+          widthChanged = true;
           cropBox.width = data.width;
         }
 
-        if (isNumber(data.height)) {
+        if (isNumber(data.height) && data.height !== cropBox.height) {
+          heightChanged = true;
           cropBox.height = data.height;
         }
 
         if (aspectRatio) {
-          if (isNumber(data.width)) {
+          if (widthChanged) {
             cropBox.height = cropBox.width / aspectRatio;
-          } else if (isNumber(data.height)) {
+          } else if (heightChanged) {
             cropBox.width = cropBox.height * aspectRatio;
           }
         }
